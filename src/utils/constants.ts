@@ -20,3 +20,9 @@ export const settings = {
 
 };
 
+export const validationMessage: { [key: string]: string }= {
+  payment: 'Необходимо выбрать способ оплаты',
+  address: 'Необходимо указать адрес',
+  phone: 'Необходимо указать телефон',
+  email: 'Необходимо указать email'
+}
