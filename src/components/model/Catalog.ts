@@ -8,11 +8,11 @@ export class Catalog {
         this.currentProduct = undefined;
     }
 
-    saveProducts(allProducts: IProduct) {
-        return this.allProducts.push(allProducts);
+    set saveProducts(products: IProduct[]) {
+        this.allProducts = products;
     }
 
-    get getProducts(): IProduct[] {
+    get getProducts(): readonly IProduct[] {
         return this.allProducts;
     }
 
@@ -21,10 +21,10 @@ export class Catalog {
     }
 
     set saveProduct(currentProduct: IProduct) {
-        this.saveProduct = currentProduct;
+        this.currentProduct = currentProduct;
     }
 
-    getProduct(): IProduct | undefined {
+    get getProduct(): IProduct | undefined {
         return this.currentProduct;
     }
 }
