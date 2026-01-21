@@ -13,7 +13,7 @@ const data = apiProducts.items;
 console.group('КАТАЛОГ ТОВАРОВ');
 const productsModel = new Catalog(data);
 console.log("Объект каталога продуктов", productsModel);
-console.log("Список продуктов", productsModel.getProducts);
+console.log("Список продуктов", productsModel.getProducts());
 
 const newProducts = [...data, {
     "id": "154c3f69-976d-4a2a-a18c-2av45046c3x1",
@@ -23,13 +23,13 @@ const newProducts = [...data, {
     "category": "софт-скил",
     "price": 1900
 }]
-console.log("Обновленный список продуктов", productsModel.saveProducts = newProducts);
+console.log("Обновленный список продуктов", productsModel.saveProducts(newProducts));
 
-productsModel.saveProduct = data[0];
-console.log('Выбранный продукт', productsModel.getProduct);
+productsModel.saveProduct(data[0]);
+console.log('Выбранный продукт', productsModel.getProduct());
 
-productsModel.saveProduct = undefined;
-console.log('Снять выбор с продукта', productsModel.getProduct);
+productsModel.saveProduct(null);
+console.log('Снять выбор с продукта', productsModel.getProduct());
 
 console.log('Получить товар по id', productsModel.getProductById(data[0]?.id));
 console.log('Получить товар по несуществующему id', productsModel.getProductById('test'));
@@ -39,7 +39,7 @@ console.group('КОРЗИНА');
 const cart = new Bin();
 
 console.group('Товар с ценой');
-console.log('Изначально в корзине', [...cart.getProductForBuy]);
+console.log('Изначально в корзине', [...cart.getProductForBuy()]);
 
 try {
     cart.addProductForBuy(data[0]);
@@ -49,7 +49,7 @@ catch(er) {
     console.error(er);
 }
 
-console.log('Корзина после добавления', [cart.getProductForBuy]);
+console.log('Корзина после добавления', [cart.getProductForBuy()]);
 console.groupEnd();
 
 console.group('Добавление продукта, которого нет в данных (проверка на undefined)');
@@ -60,36 +60,36 @@ try {
     console.log(err);
 }
 
-console.log('Продукты в корзине', [...cart1.getProductForBuy]);
+console.log('Продукты в корзине', [...cart1.getProductForBuy()]);
 try {
     cart1.addProductForBuy(data[8]);
 } catch (err) {
     console.log(err);
 }
-console.log('Продукты в корзине после добавление', cart1.getProductForBuy);
+console.log('Продукты в корзине после добавление', cart1.getProductForBuy());
 console.groupEnd();
 
 console.group('Добавление в корзину товара без цены');
 const cart2 = new Bin();
-console.log('Продукты в корзине до', [...cart2.getProductForBuy]);
+console.log('Продукты в корзине до', [...cart2.getProductForBuy()]);
 try {
     cart2.addProductForBuy(data[2]);
 } catch (err) {
     console.log(err);
 }
- console.log(' Продукты в корзине после добавление товара без цены', cart2.getProductForBuy);
+ console.log(' Продукты в корзине после добавление товара без цены', cart2.getProductForBuy());
 console.groupEnd();
 
 console.group('Повторное добавление товара в корзину (товар можно добавить только раз)');
 const cart3 = new Bin();
-console.log('Продукты в корзине', [...cart3.getProductForBuy]);
+console.log('Продукты в корзине', [...cart3.getProductForBuy()]);
 try {
     cart3.addProductForBuy(data[0]);
     cart3.addProductForBuy(data[0]);
 } catch (err) {
     console.log(err);
 }
-console.log('Продукты в корзине после добавления дубля товара', cart3.getProductForBuy);
+console.log('Продукты в корзине после добавления дубля товара', cart3.getProductForBuy());
 console.groupEnd();
 
 console.group('Удаление товара');
@@ -100,9 +100,9 @@ try {
 } catch (err) {
     console.log(err);
 }
-console.log('Продукты в корзине до удаления', [...cart4.getProductForBuy]);
+console.log('Продукты в корзине до удаления', [...cart4.getProductForBuy()]);
 cart4.removeProductForBuy(data[0]);
-console.log('Продукты в корзине после удаления', cart4.getProductForBuy);
+console.log('Продукты в корзине после удаления', cart4.getProductForBuy());
 console.groupEnd();
 
 console.group('Удаление товара, которого нет в корзине');
@@ -112,9 +112,9 @@ try {
 } catch (err) {
     console.log(err);
 }
-console.log('Продуктов в корзине до удаления', cart5.getProductForBuy.length);
+console.log('Продуктов в корзине до удаления', cart5.getProductForBuy().length);
 cart.removeProductForBuy(data[0]);
-console.log('Продукты в корзине после удаления', cart5.getProductForBuy.length);
+console.log('Продукты в корзине после удаления', cart5.getProductForBuy().length);
 console.groupEnd();
 
 console.group('Удаление продукта которого нет в данных (проверка на undefined)');
@@ -124,9 +124,9 @@ try {
 } catch (err) {
     console.log(err);
 }
-console.log('Продукты в корзине до удаления', cart6.getProductForBuy.length);
+console.log('Продукты в корзине до удаления', cart6.getProductForBuy().length);
 cart6.removeProductForBuy(data[9]);
-console.log('Продукты в корзине после удаления', cart6.getProductForBuy.length);
+console.log('Продукты в корзине после удаления', cart6.getProductForBuy().length);
 console.groupEnd();
 
 console.group('Очистка корзины')
@@ -137,9 +137,9 @@ try {
 } catch (err) {
     console.log(err);
 }
-console.log('Продуктов в корзине до очистки', cart7.getProductForBuy.length);
+console.log('Продуктов в корзине до очистки', cart7.getProductForBuy().length);
 cart7.clearBin();
-console.log('Продуктов в корзине после полной очистки', cart7.getProductForBuy.length);
+console.log('Продуктов в корзине после полной очистки', cart7.getProductForBuy().length);
 console.groupEnd();
 
 console.group('Получение общей стоимости');
@@ -150,7 +150,7 @@ try {
 } catch (err) {
     console.log(err);
 }
-console.log('Товары в корзине', cart8.getProductForBuy)
+console.log('Товары в корзине', cart8.getProductForBuy())
 console.log('Ожидаемая общая стоимость', (data[0]?.price || 0) + (data[1]?.price || 0));
 console.log('Фактическая общая стоимость', cart8.getBinCoast());
 console.groupEnd();
@@ -163,7 +163,7 @@ try {
 } catch (err) {
     console.log(err);
 }
-console.log('Товары в корзине', cart9.getProductForBuy)
+console.log('Товары в корзине', cart9.getProductForBuy())
 console.log('Ожидаемое количество', 2);
 console.log('Фактическое количество', cart8.getBinProductCount());
 console.groupEnd();
@@ -176,7 +176,7 @@ try {
 } catch (err) {
     console.log(err);
 }
-console.log('Товары в корзине', cart10.getProductForBuy)
+console.log('Товары в корзине', cart10.getProductForBuy())
 console.log(`Корзина содержит товар ${data[0]?.id}`, cart10.checkProductById(data[0]?.id));
 console.log(`Корзина содержит товар ${data[2]?.id}`, cart10.checkProductById(data[2]?.id));
 console.groupEnd();
@@ -186,7 +186,7 @@ const customer = new Buyer();
 console.log('Объект покупателя', customer);
 customer.addPayment('offline');
 console.log('Покупатель с оплатой при получении', {...customer.buyerInfo()});
-customer.addPayment(undefined);
+customer.addPayment(null);
 console.log('Покупатель с неустановленной оплатой', {...customer.buyerInfo()});
 customer.addPayment('online');
 console.log('Покупатель с оплатой онлайн', {...customer.buyerInfo()});
@@ -203,15 +203,21 @@ console.groupEnd();
 
 const api = new Api(API_URL);
 const client = new ApiClient(api);
-let data1: IProduct[];
-try {
-    const apiProducts = await client.getProducts();
-    data1 = apiProducts.items;
-} catch (error){
-    data1 = [];
-    console.error(error);
+
+
+async function init() {
+    const data = await client.getProducts();
+    const data1: IProduct[] = data.items;
+    return data1;
 }
-console.log('Товары с сервера', data1);
+
+async function postOrder(order: IOrder) {
+    await client.makeOrder(order);
+    console.log('succesfull post');
+}
+
+init().then((result) => {console.log('Товары с сервера', result)}).catch((e) => console.error(e));
+
 const order: IOrder = {
     "payment": "online",
     "email": "ya@ya.ru",
@@ -263,7 +269,7 @@ const orderWrongAddress:IOrder = {
 }
 
 const orderWithUndefinedPayment: IOrder = {
-    "payment": undefined,
+    "payment": null,
     "email": "ya@ya.ru",
     "phone": "+77777777777",
     "address": "",
@@ -275,33 +281,12 @@ const orderWithUndefinedPayment: IOrder = {
     ]
 }
 
-try {
-    const createdOrder = await client.makeOrder(order);
-    console.log(createdOrder);
-} catch (err) {
-    console.error(err);
-}
+postOrder(order).catch((e) => console.error(e));
 
-try {
-    await client.makeOrder(orderWrongTotal);
-} catch (err) {
-    console.error(err);
-}
+postOrder(orderWrongTotal).catch((e) => console.error(e));
 
-try {
-    await client.makeOrder(orderWrongProduct);
-} catch (err) {
-    console.error(err);
-}
+postOrder(orderWrongProduct).catch((e) => console.error(e));
 
-try {
-    await client.makeOrder(orderWrongAddress);
-} catch (err) {
-    console.error(err);
-}
+postOrder(orderWrongAddress).catch((e) => console.error(e));
 
-try {
-    await client.makeOrder(orderWithUndefinedPayment);
-} catch (err) {
-    console.error(err);
-}
+postOrder(orderWithUndefinedPayment).catch((e) => console.error(e));

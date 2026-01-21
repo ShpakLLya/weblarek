@@ -2,17 +2,17 @@ import { IProduct } from "../../types";
 
 export class Catalog {
   private allProducts: IProduct[];
-  private currentProduct: IProduct | undefined;
+  private currentProduct: IProduct | null;
     constructor(allProducts: IProduct[]) {
         this.allProducts = allProducts;
-        this.currentProduct = undefined;
+        this.currentProduct = null;
     }
 
-    set saveProducts(products: IProduct[]) {
+    saveProducts(products: IProduct[]) {
         this.allProducts = products;
     }
 
-    get getProducts(): readonly IProduct[] {
+    getProducts(): readonly IProduct[] {
         return this.allProducts;
     }
 
@@ -20,11 +20,11 @@ export class Catalog {
         return this.allProducts.find(product => product.id === id);
     }
 
-    set saveProduct(currentProduct: IProduct | undefined) {
+    saveProduct(currentProduct: IProduct | null) {
         this.currentProduct = currentProduct;
     }
 
-    get getProduct(): IProduct | undefined {
+    getProduct(): IProduct | null {
         return this.currentProduct;
     }
 }

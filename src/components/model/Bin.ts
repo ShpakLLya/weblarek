@@ -7,7 +7,7 @@ export class Bin {
         this.productsForBuy = [];
     }
 
-    get getProductForBuy() {
+    getProductForBuy() {
         return this.productsForBuy;
     }
 

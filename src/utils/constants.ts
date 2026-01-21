@@ -21,7 +21,7 @@ export const settings = {
 };
 
 export const validationMessage: { [key: string]: string }= {
-  payment: 'Необходимо выбрать способ оплаты',
+  payment: 'Необходимо выбрать способ оплаты. Способ оплаты может быть только картой либо наличными',
   address: 'Необходимо указать адрес',
   phone: 'Необходимо указать телефон',
   email: 'Необходимо указать email'

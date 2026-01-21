@@ -5,7 +5,7 @@ export interface IApi {
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
-export type TPayment = "online" | "offline" | undefined;
+export type TPayment = "online" | "offline" | null;
 
 export type TValidate = {[key: string]: string};
 

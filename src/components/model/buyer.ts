@@ -2,10 +2,10 @@ import { IBuyer, TPayment, TValidate } from "../../types";
 import { validationMessage } from "../../utils/constants";
 
 export class Buyer {
-    buyer: IBuyer;
+    private buyer: IBuyer;
     constructor() {
         this.buyer = {
-            payment: undefined,
+            payment: null,
             address:'',
             phone: '',
             email: ''
@@ -37,7 +37,7 @@ export class Buyer {
     }
 
     clear() {
-        this.buyer.payment = undefined;
+        this.buyer.payment = null;
         this.buyer.address = '';
         this.buyer.phone = '';
         this.buyer.email =  '';
@@ -45,10 +45,20 @@ export class Buyer {
 
     validate(): TValidate {
         const errors: TValidate = {};
-        for (const key in this.buyer) {
-            if(!this.buyer[key as keyof IBuyer]) {
-                errors[key] = validationMessage[key];
-            }
+        if (this.buyer.payment !== 'online' || this.buyer.payment !== 'online') {
+            errors.payment = validationMessage.payment;
+        }
+
+        if (this.buyer.address === '') {
+            errors.address = validationMessage.address;
+        }
+
+        if (this.buyer.phone === '') {
+            errors.phone = validationMessage.phone;
+        }
+
+        if (this.buyer.email === '') {
+            errors.email = validationMessage.email;
         }
         return errors;
     }
