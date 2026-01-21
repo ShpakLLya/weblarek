@@ -20,7 +20,7 @@ export class Catalog {
         return this.allProducts.find(product => product.id === id);
     }
 
-    set saveProduct(currentProduct: IProduct) {
+    set saveProduct(currentProduct: IProduct | undefined) {
         this.currentProduct = currentProduct;
     }
 
