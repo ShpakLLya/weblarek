@@ -1,7 +1,11 @@
+import { Api } from './components/base/Api';
+import { ApiClient } from './components/commutation/ApiClient';
 import { Bin } from './components/model/Bin';
 import { Buyer } from './components/model/buyer';
 import { Catalog } from './components/model/Catalog';
 import './scss/styles.scss';
+import { IOrder, IProduct } from './types';
+import { API_URL } from './utils/constants';
 import { apiProducts } from './utils/data';
 
 const data = apiProducts.items;
@@ -196,3 +200,108 @@ customer.clear();
 console.log('Покупатель после очистки данных', {...customer.buyerInfo()});
 console.log('Валидация покупателя', customer.validate())
 console.groupEnd();
+
+const api = new Api(API_URL);
+const client = new ApiClient(api);
+let data1: IProduct[];
+try {
+    const apiProducts = await client.getProducts();
+    data1 = apiProducts.items;
+} catch (error){
+    data1 = [];
+    console.error(error);
+}
+console.log('Товары с сервера', data1);
+const order: IOrder = {
+    "payment": "online",
+    "email": "ya@ya.ru",
+    "phone": "+77777777777",
+    "address": "HRG Sallam Abad 3",
+    "total": 11500,
+    "items": [
+        "f3867296-45c7-4603-bd34-29cea3a061d5",
+        "48e86fc0-ca99-4e13-b164-b98d65928b53"
+    ]
+}
+const orderWrongTotal:IOrder = {
+    "payment": "online",
+    "email": "ya@ya.ru",
+    "phone": "+77777777777",
+    "address": "HRG Sallam Abad 3",
+    "total": 2200,
+    "items": [
+        "854cef69-976d-4c2a-a18c-2aa45046c390",
+        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
+        '90973ae5-285c-4b6f-a6d0-65d1d760b102'
+    ]
+}
+
+const orderWrongProduct:IOrder = {
+    "payment": "online",
+    "email": "ya@ya.ru",
+    "phone": "+77777777777",
+    "address": "HRG Sallam Abad 3",
+    "total": 2200,
+    "items": [
+        "854cef69-976d-4c2a-a18c-2aa45046c390",
+        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
+        '90973ae5-285c-4b6f-a6d0-65d1d760b105'
+    ]
+}
+
+const orderWrongAddress:IOrder = {
+    "payment": "online",
+    "email": "ya@ya.ru",
+    "phone": "+77777777777",
+    "address": "",
+    "total": 2200,
+    "items": [
+        "854cef69-976d-4c2a-a18c-2aa45046c390",
+        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
+        '90973ae5-285c-4b6f-a6d0-65d1d760b105'
+    ]
+}
+
+const orderWithUndefinedPayment: IOrder = {
+    "payment": undefined,
+    "email": "ya@ya.ru",
+    "phone": "+77777777777",
+    "address": "",
+    "total": 2200,
+    "items": [
+        "854cef69-976d-4c2a-a18c-2aa45046c390",
+        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
+        '90973ae5-285c-4b6f-a6d0-65d1d760b105'
+    ]
+}
+
+try {
+    const createdOrder = await client.makeOrder(order);
+    console.log(createdOrder);
+} catch (err) {
+    console.error(err);
+}
+
+try {
+    await client.makeOrder(orderWrongTotal);
+} catch (err) {
+    console.error(err);
+}
+
+try {
+    await client.makeOrder(orderWrongProduct);
+} catch (err) {
+    console.error(err);
+}
+
+try {
+    await client.makeOrder(orderWrongAddress);
+} catch (err) {
+    console.error(err);
+}
+
+try {
+    await client.makeOrder(orderWithUndefinedPayment);
+} catch (err) {
+    console.error(err);
+}

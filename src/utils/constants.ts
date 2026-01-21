@@ -26,3 +26,8 @@ export const validationMessage: { [key: string]: string }= {
   phone: 'Необходимо указать телефон',
   email: 'Необходимо указать email'
 }
+
+export const API_ENDPOINT = {
+  PRODUCTS: '/product/',
+  ORDER: '/order/'
+}
