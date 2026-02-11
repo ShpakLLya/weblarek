@@ -1,15 +1,21 @@
 import { IProduct } from "../../types";
+import { Events } from "../../utils/constants";
+import { IEvents } from "../base/Events";
 
 export class Catalog {
   private allProducts: IProduct[];
   private currentProduct: IProduct | null;
-    constructor(allProducts: IProduct[]) {
+  private event: IEvents;
+
+    constructor(event: IEvents ,allProducts: IProduct[]) {
         this.allProducts = allProducts;
         this.currentProduct = null;
+        this.event = event;
     }
 
     saveProducts(products: IProduct[]) {
         this.allProducts = products;
+        this.event.emit(Events.CATALOG_CHANGED);
     }
 
     getProducts(): readonly IProduct[] {
@@ -22,6 +28,7 @@ export class Catalog {
 
     saveProduct(currentProduct: IProduct | null) {
         this.currentProduct = currentProduct;
+        this.event.emit(Events.CATALOG_CHANGED_SELECTED);
     }
 
     getProduct(): IProduct | null {

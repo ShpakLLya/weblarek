@@ -1,9 +1,11 @@
 import { IProduct } from "../../types";
+import { Events } from "../../utils/constants";
+import { IEvents } from "../base/Events";
 
 export class Bin {
     private productsForBuy: IProduct[];
 
-    constructor() {
+    constructor(private event: IEvents) {
         this.productsForBuy = [];
     }
 
@@ -25,16 +27,19 @@ export class Bin {
         if(!this.checkProductById(product.id)) {
             this.productsForBuy.push(product);
         }
+        this.event.emit(Events.BIN_CHANGED)
     }
 
     removeProductForBuy(product: IProduct) {
         if (product) {
             this.productsForBuy = this.productsForBuy.filter(item => item.id !== product.id);
+            this.event.emit(Events.BIN_CHANGED);
         }
     }
 
     clearBin() {
         this.productsForBuy = [];
+        this.event.emit(Events.BIN_CHANGED);
     }
 
     getBinCoast(): number {

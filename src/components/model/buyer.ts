@@ -1,9 +1,10 @@
 import { IBuyer, TPayment, TValidate } from "../../types";
-import { validationMessage } from "../../utils/constants";
+import { Events, validationMessage } from "../../utils/constants";
+import { IEvents } from "../base/Events";
 
 export class Buyer {
     private buyer: IBuyer;
-    constructor() {
+    constructor(private event: IEvents) {
         this.buyer = {
             payment: null,
             address:'',
@@ -36,16 +37,22 @@ export class Buyer {
         return this.buyer;
     }
 
+    buyerAdd(buyer: IBuyer) {
+        Object.assign(this.buyer, buyer);
+        this.event.emit(Events.BUYER_CHANGED);
+    }
+
     clear() {
         this.buyer.payment = null;
         this.buyer.address = '';
         this.buyer.phone = '';
         this.buyer.email =  '';
+        this.event.emit(Events.BUYER_CHANGED);
     }
 
     validate(): TValidate {
         const errors: TValidate = {};
-        if (this.buyer.payment !== 'online' || this.buyer.payment !== 'online') {
+        if (!this.buyer.payment) {
             errors.payment = validationMessage.payment;
         }
 

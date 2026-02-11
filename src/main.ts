@@ -1,292 +1,197 @@
 import { Api } from './components/base/Api';
+import { EventEmitter } from './components/base/Events';
 import { ApiClient } from './components/commutation/ApiClient';
 import { Bin } from './components/model/Bin';
 import { Buyer } from './components/model/buyer';
 import { Catalog } from './components/model/Catalog';
+import { Basket } from './components/view/Basket';
+import { CardBasket } from './components/view/card/CardBasket';
+import { CardCatalog } from './components/view/card/CardCatalog';
+import { CardPreview } from './components/view/card/CardPreview';
+import { Gallery } from './components/view/Gallery';
+import { Header } from './components/view/Header';
+import { Modal } from './components/view/Modal';
+import { Contacs } from './components/view/order/Contacts';
+import { Order } from './components/view/order/Order';
+import { OrderSuccess } from './components/view/order/OrderSucces';
 import './scss/styles.scss';
-import { IOrder, IProduct } from './types';
-import { API_URL } from './utils/constants';
-import { apiProducts } from './utils/data';
-
-const data = apiProducts.items;
-
-console.group('КАТАЛОГ ТОВАРОВ');
-const productsModel = new Catalog(data);
-console.log("Объект каталога продуктов", productsModel);
-console.log("Список продуктов", productsModel.getProducts());
-
-const newProducts = [...data, {
-    "id": "154c3f69-976d-4a2a-a18c-2av45046c3x1",
-    "description": "Тест",
-    "image": "/Asterisk_2.svg",
-    "title": "клавиатура с Али",
-    "category": "софт-скил",
-    "price": 1900
-}]
-console.log("Обновленный список продуктов", productsModel.saveProducts(newProducts));
-
-productsModel.saveProduct(data[0]);
-console.log('Выбранный продукт', productsModel.getProduct());
-
-productsModel.saveProduct(null);
-console.log('Снять выбор с продукта', productsModel.getProduct());
-
-console.log('Получить товар по id', productsModel.getProductById(data[0]?.id));
-console.log('Получить товар по несуществующему id', productsModel.getProductById('test'));
-console.groupEnd();
-
-console.group('КОРЗИНА');
-const cart = new Bin();
-
-console.group('Товар с ценой');
-console.log('Изначально в корзине', [...cart.getProductForBuy()]);
-
-try {
-    cart.addProductForBuy(data[0]);
-    cart.addProductForBuy(data[3]);
-}
-catch(er) {
-    console.error(er);
-}
-
-console.log('Корзина после добавления', [cart.getProductForBuy()]);
-console.groupEnd();
-
-console.group('Добавление продукта, которого нет в данных (проверка на undefined)');
-const cart1 = new Bin();
-try {
-    cart1.addProductForBuy(data[1]);
-} catch (err) {
-    console.log(err);
-}
-
-console.log('Продукты в корзине', [...cart1.getProductForBuy()]);
-try {
-    cart1.addProductForBuy(data[8]);
-} catch (err) {
-    console.log(err);
-}
-console.log('Продукты в корзине после добавление', cart1.getProductForBuy());
-console.groupEnd();
-
-console.group('Добавление в корзину товара без цены');
-const cart2 = new Bin();
-console.log('Продукты в корзине до', [...cart2.getProductForBuy()]);
-try {
-    cart2.addProductForBuy(data[2]);
-} catch (err) {
-    console.log(err);
-}
- console.log(' Продукты в корзине после добавление товара без цены', cart2.getProductForBuy());
-console.groupEnd();
-
-console.group('Повторное добавление товара в корзину (товар можно добавить только раз)');
-const cart3 = new Bin();
-console.log('Продукты в корзине', [...cart3.getProductForBuy()]);
-try {
-    cart3.addProductForBuy(data[0]);
-    cart3.addProductForBuy(data[0]);
-} catch (err) {
-    console.log(err);
-}
-console.log('Продукты в корзине после добавления дубля товара', cart3.getProductForBuy());
-console.groupEnd();
-
-console.group('Удаление товара');
-const cart4 = new Bin();
-try {
-    cart4.addProductForBuy(data[0]);
-    cart4.addProductForBuy(data[1]);
-} catch (err) {
-    console.log(err);
-}
-console.log('Продукты в корзине до удаления', [...cart4.getProductForBuy()]);
-cart4.removeProductForBuy(data[0]);
-console.log('Продукты в корзине после удаления', cart4.getProductForBuy());
-console.groupEnd();
-
-console.group('Удаление товара, которого нет в корзине');
-const cart5 = new Bin();
-try {
-    cart5.addProductForBuy(data[1]);
-} catch (err) {
-    console.log(err);
-}
-console.log('Продуктов в корзине до удаления', cart5.getProductForBuy().length);
-cart.removeProductForBuy(data[0]);
-console.log('Продукты в корзине после удаления', cart5.getProductForBuy().length);
-console.groupEnd();
-
-console.group('Удаление продукта которого нет в данных (проверка на undefined)');
-const cart6 = new Bin();
-try {
-    cart6.addProductForBuy(data[1]);
-} catch (err) {
-    console.log(err);
-}
-console.log('Продукты в корзине до удаления', cart6.getProductForBuy().length);
-cart6.removeProductForBuy(data[9]);
-console.log('Продукты в корзине после удаления', cart6.getProductForBuy().length);
-console.groupEnd();
-
-console.group('Очистка корзины')
-const cart7 = new Bin();
-try {
-    cart7.addProductForBuy(data[0]);
-    cart7.addProductForBuy(data[1]);
-} catch (err) {
-    console.log(err);
-}
-console.log('Продуктов в корзине до очистки', cart7.getProductForBuy().length);
-cart7.clearBin();
-console.log('Продуктов в корзине после полной очистки', cart7.getProductForBuy().length);
-console.groupEnd();
-
-console.group('Получение общей стоимости');
-const cart8 = new Bin();
-try {
-    cart8.addProductForBuy(data[0]);
-    cart8.addProductForBuy(data[1]);
-} catch (err) {
-    console.log(err);
-}
-console.log('Товары в корзине', cart8.getProductForBuy())
-console.log('Ожидаемая общая стоимость', (data[0]?.price || 0) + (data[1]?.price || 0));
-console.log('Фактическая общая стоимость', cart8.getBinCoast());
-console.groupEnd();
-
-console.group('Получение количества позиций');
-const cart9 = new Bin();
-try {
-    cart9.addProductForBuy(data[0]);
-    cart9.addProductForBuy(data[1]);
-} catch (err) {
-    console.log(err);
-}
-console.log('Товары в корзине', cart9.getProductForBuy())
-console.log('Ожидаемое количество', 2);
-console.log('Фактическое количество', cart8.getBinProductCount());
-console.groupEnd();
-
-console.group('Проверка наличия товара в корзине');
-const cart10 = new Bin();
-try {
-    cart10.addProductForBuy(data[0]);
-    cart10.addProductForBuy(data[1]);
-} catch (err) {
-    console.log(err);
-}
-console.log('Товары в корзине', cart10.getProductForBuy())
-console.log(`Корзина содержит товар ${data[0]?.id}`, cart10.checkProductById(data[0]?.id));
-console.log(`Корзина содержит товар ${data[2]?.id}`, cart10.checkProductById(data[2]?.id));
-console.groupEnd();
-
-console.group('ПОКУПАТЕЛЬ')
-const customer = new Buyer();
-console.log('Объект покупателя', customer);
-customer.addPayment('offline');
-console.log('Покупатель с оплатой при получении', {...customer.buyerInfo()});
-customer.addPayment(null);
-console.log('Покупатель с неустановленной оплатой', {...customer.buyerInfo()});
-customer.addPayment('online');
-console.log('Покупатель с оплатой онлайн', {...customer.buyerInfo()});
-
-customer.addAddres('Moscow, Kremlin')
-    .addPhone('+8 800 355 35 35')
-    .addEmail('avtotest@ya.ru');
-console.log('Покупатель со всеми данными', {...customer.buyerInfo()});
-console.log('Валидация покупателя', customer.validate());
-customer.clear();
-console.log('Покупатель после очистки данных', {...customer.buyerInfo()});
-console.log('Валидация покупателя', customer.validate())
-console.groupEnd();
+import { IBuyer, IOrder, IProduct, TCardPreview, TValidate } from './types';
+import { API_URL, Events } from './utils/constants';
+import { cloneTemplate, ensureElement, filterErrors } from './utils/utils';
 
 const api = new Api(API_URL);
-const client = new ApiClient(api);
+const clientApi = new ApiClient(api);
 
+const events = new EventEmitter();
 
-async function init() {
-    const data = await client.getProducts();
-    const data1: IProduct[] = data.items;
-    return data1;
+const catalog = new Catalog(events, []);
+const bin = new Bin(events);
+const buyer = new Buyer(events);
+
+const gallery = new Gallery(ensureElement('.page'));
+const popup = new Modal(ensureElement('#modal-container'));
+const header = new Header(events, ensureElement('.header'));
+const basket = new Basket(events, cloneTemplate('#basket'));
+const orderForm = new Order(events, cloneTemplate('#order'));
+const contactsForm = new Contacs(events, cloneTemplate('#contacts'));
+const successForm = new OrderSuccess(events, cloneTemplate('#success'));
+
+let renderedBasket: HTMLElement;
+
+let orderFormVisited = false;
+let contactsFormVisited = false;
+const orderStepErrors = ['address', 'payment'];
+const contactsStepErrors = ['phone', 'email'];
+
+events.on(Events.CATALOG_CHANGED, () => {
+    const itemsCards = catalog.getProducts()
+        .map(item => {
+            const card = new CardCatalog(cloneTemplate('#card-catalog'), {
+                onclick: () => {
+                    events.emit(Events.CARD_OPEN, item);
+                }
+            });
+            return card.render({...item, image: {src: item.image, alt: item.title}});
+        });
+    return gallery.render({catalog: itemsCards});
+})
+
+events.on(Events.CATALOG_CHANGED_SELECTED, () => {
+    const currentProduct: IProduct = catalog.getProduct() as IProduct;
+    const item: TCardPreview = {...currentProduct, image: {src: currentProduct.image, alt: currentProduct.title}};
+    const card = new CardPreview(cloneTemplate('#card-preview'), {
+        onclick: () =>{
+            bin.checkProductById(currentProduct.id) ? events.emit(Events.BASKET_REMOVE_ITEM, currentProduct) : events.emit(Events.BASKET_ADD_ITEM, currentProduct);
+            popup.close();
+        }
+    });
+
+    if(!currentProduct.price) {
+        item['buttonText'] = 'Недоступно';
+        card.disableButton();
+    } else if(!bin.checkProductById(currentProduct.id)) {
+        item['buttonText'] = 'Купить';
+    } else if (bin.checkProductById(currentProduct.id)) {
+        item['buttonText'] = 'Удалить из корзины';
+    }
+
+    const renderCard = card.render(item);
+    popup.render({content: renderCard});
+    popup.open();
+});
+
+events.on(Events.BIN_CHANGED, () => {
+    header.render({ counter: bin.getBinProductCount()});
+    bin.getBinProductCount() ? basket.enableButton : basket.disableButton();
+    const renderedItems = renderBasketCards(bin);
+    renderedBasket = basket.render({price: bin.getBinCoast(), content: renderedItems});
+});
+
+events.on(Events.BUYER_CHANGED, () => {
+    const errors: TValidate = buyer.validate();
+    const orderFormErrors = filterErrors(errors, orderStepErrors);
+    const contactsFormErrors = filterErrors(errors, contactsStepErrors);
+
+    orderForm.render({
+        errors: orderFormErrors,
+        buttonActive: buyer.buyerInfo().payment,
+        address: buyer.buyerInfo().address
+    });
+
+    contactsForm.render({
+        errors: contactsFormErrors,
+        phone: buyer.buyerInfo().phone,
+        email: buyer.buyerInfo().email
+    });
+
+    Object.keys(orderFormErrors).length !== 0 ? orderForm.disableNextButton() : orderForm.enableNextButton();
+
+    Object.keys(contactsFormErrors).length !== 0 ? contactsForm.disableNextButton() : contactsForm.enableNextButton();
+    
+});
+
+events.on(Events.BASKET_OPEN, () => {
+    popup.render({content: renderedBasket});
+    popup.open();
+});
+
+events.on(Events.CARD_OPEN, (data: IProduct) => {
+    catalog.saveProduct(data);
+});
+
+events.on(Events.BASKET_ADD_ITEM, (data: IProduct) => {
+    bin.addProductForBuy(data);
+});
+
+events.on(Events.BASKET_REMOVE_ITEM, (item: IProduct) => {
+    bin.removeProductForBuy(item);
+});
+
+events.on(Events.FORM_CHANGE, (data: IBuyer) => {
+    buyer.buyerAdd({...buyer.buyerInfo(), ...data});
+});
+
+events.on(Events.ORDER_CHECKOUT, () => {
+    const errors: TValidate = buyer.validate();
+    const orderFormErrors = filterErrors(errors, orderStepErrors);
+
+    const renderedOrderForm = orderForm.render({
+        errors: orderFormVisited ? orderFormErrors : {}
+    });
+    popup.render({content: renderedOrderForm});
+    orderFormVisited = true;
+});
+
+events.on(Events.ORDER_PROCEED, () => {
+    const errors: TValidate = buyer.validate();
+    const contactsFormErrors = filterErrors(errors, contactsStepErrors);
+
+    const renderContactsForm = contactsForm.render({
+        errors: contactsFormVisited ? contactsFormErrors : {}
+    });
+    popup.render({content: renderContactsForm});
+    contactsFormVisited = true;
+});
+
+events.on(Events.ORDER_PAY, () => {
+    const order: IOrder = {
+        ...buyer.buyerInfo(),
+        total: bin.getBinCoast(),
+        items: bin.getProductForBuy().map(item => item.id)
+    }
+
+    clientApi.makeOrder(order)
+        .then(data => {
+            const renderedForm = successForm.render({price: data.total});
+            popup.render({content: renderedForm});
+
+            bin.clearBin();
+            buyer.clear();
+
+            orderFormVisited = false;
+            contactsFormVisited = false;
+        })
+        .catch(err => contactsForm.render({errors: {err}}));
+});
+
+events.on(Events.ORDER_SUCCESS, () => {
+    popup.close();
+});
+
+clientApi.getProducts()
+    .then(data => {
+        catalog.saveProducts(data.items);
+    })
+    .catch (err => console.error(err));
+
+const renderBasketCards = (bin: Bin): HTMLElement[] => {
+    const binProducts = bin.getProductForBuy();
+    return binProducts.map((item, index) => {
+        const card = new CardBasket(cloneTemplate('#card-basket'), {
+            onclick: () => {
+                events.emit(Events.BASKET_REMOVE_ITEM, item);
+            }
+        });
+        return card.render({...item, index: index + 1});
+    })
 }
-
-async function postOrder(order: IOrder) {
-    await client.makeOrder(order);
-    console.log('succesfull post');
-}
-
-init().then((result) => {console.log('Товары с сервера', result)}).catch((e) => console.error(e));
-
-const order: IOrder = {
-    "payment": "online",
-    "email": "ya@ya.ru",
-    "phone": "+77777777777",
-    "address": "HRG Sallam Abad 3",
-    "total": 11500,
-    "items": [
-        "f3867296-45c7-4603-bd34-29cea3a061d5",
-        "48e86fc0-ca99-4e13-b164-b98d65928b53"
-    ]
-}
-const orderWrongTotal:IOrder = {
-    "payment": "online",
-    "email": "ya@ya.ru",
-    "phone": "+77777777777",
-    "address": "HRG Sallam Abad 3",
-    "total": 2200,
-    "items": [
-        "854cef69-976d-4c2a-a18c-2aa45046c390",
-        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
-        '90973ae5-285c-4b6f-a6d0-65d1d760b102'
-    ]
-}
-
-const orderWrongProduct:IOrder = {
-    "payment": "online",
-    "email": "ya@ya.ru",
-    "phone": "+77777777777",
-    "address": "HRG Sallam Abad 3",
-    "total": 2200,
-    "items": [
-        "854cef69-976d-4c2a-a18c-2aa45046c390",
-        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
-        '90973ae5-285c-4b6f-a6d0-65d1d760b105'
-    ]
-}
-
-const orderWrongAddress:IOrder = {
-    "payment": "online",
-    "email": "ya@ya.ru",
-    "phone": "+77777777777",
-    "address": "",
-    "total": 2200,
-    "items": [
-        "854cef69-976d-4c2a-a18c-2aa45046c390",
-        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
-        '90973ae5-285c-4b6f-a6d0-65d1d760b105'
-    ]
-}
-
-const orderWithUndefinedPayment: IOrder = {
-    "payment": null,
-    "email": "ya@ya.ru",
-    "phone": "+77777777777",
-    "address": "",
-    "total": 2200,
-    "items": [
-        "854cef69-976d-4c2a-a18c-2aa45046c390",
-        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
-        '90973ae5-285c-4b6f-a6d0-65d1d760b105'
-    ]
-}
-
-postOrder(order).catch((e) => console.error(e));
-
-postOrder(orderWrongTotal).catch((e) => console.error(e));
-
-postOrder(orderWrongProduct).catch((e) => console.error(e));
-
-postOrder(orderWrongAddress).catch((e) => console.error(e));
-
-postOrder(orderWithUndefinedPayment).catch((e) => console.error(e));
