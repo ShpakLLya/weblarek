@@ -26,8 +26,9 @@ export class Bin {
 
         if(!this.checkProductById(product.id)) {
             this.productsForBuy.push(product);
+            this.event.emit(Events.BIN_CHANGED);
         }
-        this.event.emit(Events.BIN_CHANGED)
+        
     }
 
     removeProductForBuy(product: IProduct) {

@@ -223,11 +223,9 @@ Presenter - презентер содержит основную логику п
 Конструктор:
 `constructor(container: HTMLElement)` — принимает контейнер, в котором будут отображаться товары.
 
-Поля:
-`catalogElement: HTMLElement` — элемент для размещения товаров.
-
 Методы:
-`set catalog(items: HTMLElement[])` — сеттер для установки коллекции карточек товаров в галерею. Добавляет переданные HTML элементы в контейнер галереи.
+`set catalog(items: HTMLElement[])` — сеттер для установки коллекции карточек товаров в галерею. Заменяет содержимое контейнера переданными HTML элементами (использует `replaceChildren`).
+`render(data?: Partial<IGalleryData>): HTMLElement` — перерендерирует компонент с новыми данными и возвращает корневой DOM элемент.
 
 #### Класс Header
 Представляет заголовок сайта, отображает лого и корзину с счетчиком товаров.
@@ -271,8 +269,7 @@ Presenter - презентер содержит основную логику п
 Методы:
 `set price(value: number)` — устанавливает и отображает общую стоимость товаров.
 `set content(items: HTMLElement[])` — устанавливает список карточек товаров в корзину или текст "Корзина пуста".
-`disableButton()` — отключает кнопку оформления заказа.
-`enableButton()` — включает кнопку оформления заказа.
+`toggleButton(condition: TToggleButton)` — включает или отключает кнопку оформления заказа ('enable' или 'disable').
 
 #### Класс Card (базовый класс для карточек)
 Базовый класс для представления карточки товара.
@@ -307,6 +304,7 @@ Presenter - презентер содержит основную логику п
 
 Конструктор:
 `constructor(container: HTMLElement, actions?: ICardActions)` — принимает контейнер и опциональный объект с функцией onclick для кнопки покупки.
+events: IEvents, actions?: ICardActions` — принимает контейнер, объект событий и опциональный объект с функцией onclick для дополнительных действий.
 
 Поля:
 `descriptionElement: HTMLElement` — элемент для отображения описания товара.
@@ -319,8 +317,10 @@ Presenter - презентер содержит основную логику п
 `set buttonText(value: string)` — устанавливает текст кнопки.
 `set category(value: keyof typeof categoryMap)` — устанавливает категорию товара.
 `set image(value: TCardImage)` — устанавливает изображение товара.
-`disableButton()` — отключает кнопку когда товар недоступен (нет цены).
+`toggleButton(condition: TToggleButton)` — включает или отключает кнопку ('enable' или 'disable').
 
+События:
+Компонент отправляет событие `CARD_BUTTON_CLICK` при клике на кнопку товара. Презентер определяет, добавлять или удалять товар из корзины на основе данных модели
 #### Класс CardBasket
 Представляет карточку товара в корзине.
 
@@ -337,21 +337,16 @@ Presenter - презентер содержит основную логику п
 #### Класс BaseOrder
 Базовый класс для форм оформления заказа (адрес доставки и контакты).
 
-Конструктор:
-`constructor(events: IEvents, container: HTMLElement)` — принимает объект событий и контейнер формы.
-
-Поля:
-`errorsElement: HTMLElement` — элемент для отображения ошибок валидации.
-`nextButtonElement: HTMLButtonElement` — кнопка для перехода на следующий шаг.
+Конструктор: или отправки формы.
 
 Методы:
 `set errors(messages: TValidate)` — отображает сообщения об ошибках валидации.
 `inputHandler(e: Event)` — обработчик события ввода, эмитит событие FORM_CHANGE при изменении input элементов.
-`disableNextButton()` — отключает кнопку перехода.
-`enableNextButton()` — включает кнопку перехода.
+`toggleNextButton(condition: TToggleButton)` — включает или отключает кнопку перехода/отправки ('enable' или 'disable').
+`render(data?: Partial<T>): HTMLElement` — перерендерирует компонент с новыми данными.
 
-#### Класс Order
-Представляет форму выбора способа оплаты и ввода адреса доставки.
+Защищенные методы:
+`protected onSubmit(): void` — абстрактный метод, которой переопр Наследуется от BaseOrder.
 
 Конструктор:
 `constructor(events: IEvents, container: HTMLElement)` — принимает объект событий и контейнер формы.
@@ -363,13 +358,26 @@ Presenter - презентер содержит основную логику п
 Методы:
 `set buttonActive(paymentType: string)` — подсвечивает выбранный способ оплаты классом 'button_alt-active'.
 `set address(value: string)` — устанавливает значение поля адреса.
-
-#### Класс Contacts
-Представляет форму ввода контактной информации (email и телефон) покупателя.
+`protected onSubmit(): void` — отправляет событие `ORDER_PROCEED` при отправке формы
 
 Конструктор:
 `constructor(events: IEvents, container: HTMLElement)` — принимает объект событий и контейнер формы.
 
+Поля:
+`paymentButtonContainer: HTMLElement` — контейнер с кнопками выбора способа оплаты.
+`addressElement: HTMLInputElement` — поле ввода адреса доставки. Наследуется от BaseOrder.
+
+Конструктор:
+`constructor(events: IEvents, container: HTMLElement)` — принимает объект событий и контейнер формы.
+
+Поля:
+`phoneElement: HTMLInputElement` — поле ввода номера телефона.
+`emailElement: HTMLInputElement` — поле ввода email адреса.
+
+Методы:
+`set phone(value: string)` — устанавливает значение поля телефона.
+`set email(value: string)` — устанавливает значение поля email.
+`protected onSubmit(): void` — отправляет событие `ORDER_PAY` при отправке формы
 Поля:
 `phoneElement: HTMLInputElement` — поле ввода номера телефона.
 `emailElement: HTMLInputElement` — поле ввода email адреса.

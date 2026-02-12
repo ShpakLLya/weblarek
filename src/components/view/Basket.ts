@@ -1,4 +1,4 @@
-import { IBasketData } from "../../types";
+import { IBasketData, TToggleButton } from "../../types";
 import { Events } from "../../utils/constants";
 import { ensureElement } from "../../utils/utils";
 import { Component } from "../base/Component";
@@ -21,20 +21,22 @@ export class Basket extends Component<IBasketData> {
         })
     }
 
-    disableButton() {
-        this.checkButtonElement.setAttribute('disabled', 'disabled');
-    }
-
-    enableButton() {
-        this.checkButtonElement.removeAttribute('disabled');
-    }
+    toggleButton(condition: TToggleButton) {
+            if(condition === 'disable') {
+                this.checkButtonElement.setAttribute('disabled', 'disabled');
+            }
+            
+            if(condition === 'enable') {
+                this.checkButtonElement.removeAttribute('disabled');
+            }
+        }
 
     set price(value: number) {
-        this.priceElement.textContent = value.toString();
+        this.priceElement.textContent = `${value.toString()} синапсов`;
     }
 
     set content(items: HTMLElement[]) {
-        items ? this.contentElement.replaceChildren(...items) : this.contentElement.textContent = 'Корзина пуста';
+        this.contentElement.replaceChildren(...items);
     }
     
 }

@@ -13,13 +13,10 @@ export class Contacs extends BaseOrder<TContacs> {
 
         this.phoneElement = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
         this.emeilElement = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
+    }
 
-        this.container.addEventListener('input', this.inputHandler);
-
-        this.nextButtonElement.addEventListener('click', (e)=> {
-            e.preventDefault();
-            this.events.emit(Events.ORDER_PAY);
-        })
+    protected onSubmit(): void {
+        this.events.emit(Events.ORDER_PAY);
     }
 
     set phone(value: string) {

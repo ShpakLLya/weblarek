@@ -1,6 +1,7 @@
-import { ICardActions, TCardImage, TCardPreview } from "../../../types";
-import { categoryMap, CDN_URL } from "../../../utils/constants";
+import { ICardActions, TCardImage, TCardPreview, TToggleButton } from "../../../types";
+import { categoryMap, CDN_URL, Events } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
+import { IEvents } from "../../base/Events";
 import { Card } from "./Card";
 
 export class CardPreview extends Card<TCardPreview> {
@@ -9,7 +10,7 @@ export class CardPreview extends Card<TCardPreview> {
     protected categoryElement: HTMLElement;
     protected imageElement: HTMLImageElement;
 
-    constructor(container: HTMLElement, actions?: ICardActions) {
+    constructor(container: HTMLElement, private events: IEvents, actions?: ICardActions) {
         super(container);
 
         this.descriptionElement = ensureElement<HTMLElement>('.card__text', this.container);
@@ -17,14 +18,26 @@ export class CardPreview extends Card<TCardPreview> {
         this.categoryElement = ensureElement<HTMLElement>('.card__category', this.container);
         this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
 
+        this.buttonElement.addEventListener('click', () => {
+            this.events.emit(Events.CARD_BUTTON_CLICK);
+        });
+
         if (actions?.onclick) {
             this.buttonElement.addEventListener('click', actions.onclick);
         }
     }
 
-    disableButton() {
-        this.buttonElement.setAttribute('disabled', 'disabled');
+    
+
+    toggleButton(condition: TToggleButton) {
+        
+        if(condition === 'disable') {
+            this.buttonElement.setAttribute('disabled', 'disabled');
+        } else {
+            this.buttonElement.removeAttribute('disabled');
+            }
     }
+        
 
     set description(value: string) {
         this.descriptionElement.textContent = value;

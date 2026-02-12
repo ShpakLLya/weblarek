@@ -50,6 +50,7 @@ export const Events  = {
   BASKET_REMOVE_ITEM: 'basket:removeItem',
 
   CARD_OPEN: 'card:select',
+  CARD_BUTTON_CLICK: 'card:buttonClick',
 
   FORM_CHANGE: 'form:change',
 

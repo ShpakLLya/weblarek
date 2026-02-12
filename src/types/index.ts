@@ -34,6 +34,8 @@ export type TOrder = {
   errors: TValidate;
 } & {buttonActive: TPayment, address: string}
 
+export type TToggleButton = 'enable' | 'disable'
+
 export interface IProduct {
   id: string;
   description: string;

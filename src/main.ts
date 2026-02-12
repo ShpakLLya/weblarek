@@ -28,18 +28,18 @@ const catalog = new Catalog(events, []);
 const bin = new Bin(events);
 const buyer = new Buyer(events);
 
-const gallery = new Gallery(ensureElement('.page'));
+const gallery = new Gallery(ensureElement('.gallery'));
 const popup = new Modal(ensureElement('#modal-container'));
 const header = new Header(events, ensureElement('.header'));
 const basket = new Basket(events, cloneTemplate('#basket'));
+const cardPreview = new CardPreview(cloneTemplate('#card-preview'), events);
 const orderForm = new Order(events, cloneTemplate('#order'));
 const contactsForm = new Contacs(events, cloneTemplate('#contacts'));
 const successForm = new OrderSuccess(events, cloneTemplate('#success'));
 
-let renderedBasket: HTMLElement;
+// Инициализация состояния кнопки корзины
+basket.toggleButton('disable');
 
-let orderFormVisited = false;
-let contactsFormVisited = false;
 const orderStepErrors = ['address', 'payment'];
 const contactsStepErrors = ['phone', 'email'];
 
@@ -59,32 +59,27 @@ events.on(Events.CATALOG_CHANGED, () => {
 events.on(Events.CATALOG_CHANGED_SELECTED, () => {
     const currentProduct: IProduct = catalog.getProduct() as IProduct;
     const item: TCardPreview = {...currentProduct, image: {src: currentProduct.image, alt: currentProduct.title}};
-    const card = new CardPreview(cloneTemplate('#card-preview'), {
-        onclick: () =>{
-            bin.checkProductById(currentProduct.id) ? events.emit(Events.BASKET_REMOVE_ITEM, currentProduct) : events.emit(Events.BASKET_ADD_ITEM, currentProduct);
-            popup.close();
-        }
-    });
 
     if(!currentProduct.price) {
         item['buttonText'] = 'Недоступно';
-        card.disableButton();
+        cardPreview.toggleButton('disable');
     } else if(!bin.checkProductById(currentProduct.id)) {
         item['buttonText'] = 'Купить';
+        cardPreview.toggleButton('enable');
     } else if (bin.checkProductById(currentProduct.id)) {
         item['buttonText'] = 'Удалить из корзины';
+        cardPreview.toggleButton('enable');
     }
 
-    const renderCard = card.render(item);
-    popup.render({content: renderCard});
+    popup.render({content: cardPreview.render(item)});
     popup.open();
 });
 
 events.on(Events.BIN_CHANGED, () => {
     header.render({ counter: bin.getBinProductCount()});
-    bin.getBinProductCount() ? basket.enableButton : basket.disableButton();
+    bin.getBinProductCount() ? basket.toggleButton('enable') : basket.toggleButton('disable');
     const renderedItems = renderBasketCards(bin);
-    renderedBasket = basket.render({price: bin.getBinCoast(), content: renderedItems});
+    basket.render({price: bin.getBinCoast(), content: renderedItems});
 });
 
 events.on(Events.BUYER_CHANGED, () => {
@@ -104,15 +99,21 @@ events.on(Events.BUYER_CHANGED, () => {
         email: buyer.buyerInfo().email
     });
 
-    Object.keys(orderFormErrors).length !== 0 ? orderForm.disableNextButton() : orderForm.enableNextButton();
+    Object.keys(orderFormErrors).length !== 0 ? orderForm.toggleNextButton('disable') : orderForm.toggleNextButton('enable');
 
-    Object.keys(contactsFormErrors).length !== 0 ? contactsForm.disableNextButton() : contactsForm.enableNextButton();
+    Object.keys(contactsFormErrors).length !== 0 ? contactsForm.toggleNextButton('disable') : contactsForm.toggleNextButton('enable');
     
 });
 
 events.on(Events.BASKET_OPEN, () => {
-    popup.render({content: renderedBasket});
+    popup.render({content: basket.render()});
     popup.open();
+});
+
+events.on(Events.CARD_BUTTON_CLICK, () => {
+    const currentProduct: IProduct = catalog.getProduct() as IProduct;
+    bin.checkProductById(currentProduct.id) ? events.emit(Events.BASKET_REMOVE_ITEM, currentProduct) : events.emit(Events.BASKET_ADD_ITEM, currentProduct);
+    popup.close();
 });
 
 events.on(Events.CARD_OPEN, (data: IProduct) => {
@@ -128,29 +129,34 @@ events.on(Events.BASKET_REMOVE_ITEM, (item: IProduct) => {
 });
 
 events.on(Events.FORM_CHANGE, (data: IBuyer) => {
-    buyer.buyerAdd({...buyer.buyerInfo(), ...data});
+    if (data.payment !== undefined) buyer.addPayment(data.payment);
+    if (data.email !== undefined) buyer.addEmail(data.email);
+    if (data.phone !== undefined) buyer.addPhone(data.phone);
+    if (data.address !== undefined) buyer.addAddres(data.address);
 });
 
 events.on(Events.ORDER_CHECKOUT, () => {
     const errors: TValidate = buyer.validate();
     const orderFormErrors = filterErrors(errors, orderStepErrors);
+    const buyerData = buyer.buyerInfo();
+    const isFormFilled = buyerData.address || buyerData.payment;
 
     const renderedOrderForm = orderForm.render({
-        errors: orderFormVisited ? orderFormErrors : {}
+        errors: isFormFilled ? orderFormErrors : {}
     });
     popup.render({content: renderedOrderForm});
-    orderFormVisited = true;
 });
 
 events.on(Events.ORDER_PROCEED, () => {
     const errors: TValidate = buyer.validate();
     const contactsFormErrors = filterErrors(errors, contactsStepErrors);
+    const buyerData = buyer.buyerInfo();
+    const isFormFilled = buyerData.phone || buyerData.email;
 
     const renderContactsForm = contactsForm.render({
-        errors: contactsFormVisited ? contactsFormErrors : {}
+        errors: isFormFilled ? contactsFormErrors : {}
     });
     popup.render({content: renderContactsForm});
-    contactsFormVisited = true;
 });
 
 events.on(Events.ORDER_PAY, () => {
@@ -167,9 +173,6 @@ events.on(Events.ORDER_PAY, () => {
 
             bin.clearBin();
             buyer.clear();
-
-            orderFormVisited = false;
-            contactsFormVisited = false;
         })
         .catch(err => contactsForm.render({errors: {err}}));
 });

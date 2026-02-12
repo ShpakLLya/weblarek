@@ -14,20 +14,18 @@ export class Order extends BaseOrder<TOrder> {
         this.paymentButtonContainer = ensureElement<HTMLElement>('.order__buttons', this.container);
         this.addressElement = ensureElement<HTMLInputElement>('input[name="address"]', this.container);
 
-        this.nextButtonElement.addEventListener('click', (e)=> {
-            e.preventDefault();
-            this.events.emit(Events.ORDER_PROCEED);
-        });
-
-        this.container.addEventListener('input', this.inputHandler);
         this.paymentButtonContainer.addEventListener('click', (e)=>{
             const currentButton = (e.target as HTMLElement).closest('button');
             if(!currentButton) return;
 
             this.events.emit(Events.FORM_CHANGE, {payment: paymentMethods[currentButton.name]});
         })
-        
     }
+
+    protected onSubmit(): void {
+        this.events.emit(Events.ORDER_PROCEED);
+    }
+
     set buttonActive(paymentType: string) {
         const buttonName = Object.keys(paymentMethods).find(key => paymentMethods[key] === paymentType);
         Array.from(this.paymentButtonContainer.children).forEach(button => {
